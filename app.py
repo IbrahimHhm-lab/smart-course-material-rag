@@ -33,6 +33,9 @@ CHUNK_OVERLAP = 250
 TOP_K = 8
 SIMILARITY_THRESHOLD = 0.35
 
+# التصحيح الرئيسي: زيادة حد التوليد
+MAX_OUTPUT_TOKENS = 1500
+
 ABSTAIN = (
     "لا تتوفر معلومات كافية في المادة "
     "المسترجعة للإجابة بدقة."
@@ -113,6 +116,11 @@ def create_chunks(
 ):
     chunks = []
 
+    if size <= overlap or overlap < 0:
+        raise ValueError(
+            "إعدادات تقسيم النص غير صحيحة."
+        )
+
     for page_data in pages:
 
         page_number = page_data["page"]
@@ -125,11 +133,11 @@ def create_chunks(
             if p.strip()
         ]
 
-        # معالجة الفقرات الطويلة حتى لا تتجاوز
-        # حجم المقطع المحدد
+        # معالجة الفقرات الطويلة
         units = []
 
         for paragraph in paragraphs:
+
             if len(paragraph) <= size:
                 units.append(paragraph)
                 continue
@@ -137,6 +145,7 @@ def create_chunks(
             step = size - overlap
 
             for start in range(0, len(paragraph), step):
+
                 part = paragraph[start:start + size]
 
                 if part.strip():
@@ -164,15 +173,18 @@ def create_chunks(
                     "page": page_number
                 })
 
-            # المحافظة على جزء من السياق السابق
-            previous_tail = buffer[-overlap:]
+            # الاحتفاظ بجزء من السياق السابق
+            previous_tail = (
+                buffer[-overlap:]
+                if overlap else ""
+            )
 
             if previous_tail:
                 candidate = previous_tail + "\n" + unit
             else:
                 candidate = unit
 
-            # تجنب تجاوز الحجم الأقصى
+            # ضمان عدم تجاوز الحجم الأقصى
             buffer = candidate[-size:]
 
         if buffer.strip():
@@ -229,6 +241,7 @@ def process_pdf(file_path):
         return None, "يرجى رفع ملف PDF."
 
     try:
+
         if os.path.getsize(file_path) > MAX_FILE_BYTES:
             return None, (
                 "الحد الأقصى لحجم الملف 10 ميجابايت."
@@ -315,7 +328,7 @@ def retrieve_chunks(question, state):
         current_page = chunks[idx]["page"]
 
         # إضافة المقطع السابق واللاحق
-        # بشرط أن يكونا من الصفحة نفسها
+        # من الصفحة نفسها
         for neighbor in (idx - 1, idx + 1):
 
             if not (0 <= neighbor < len(chunks)):
@@ -351,7 +364,7 @@ def build_context(retrieved):
 
 
 # ============================================================
-# 10. تعليمات النموذج
+# 10. تعليمات النموذج المحسنة
 # ============================================================
 
 SYSTEM_PROMPT = """
@@ -396,6 +409,18 @@ SYSTEM_PROMPT = """
     المسترجعة للإجابة بدقة.
 
 13. اجعل الإجابة واضحة ومنظمة ومباشرة.
+
+14. فضّل الفقرات والقوائم القصيرة
+    على الجداول الطويلة عندما يكون ذلك مناسبًا.
+
+15. أكمل جميع أجزاء الإجابة المطلوبة،
+    وتجنب التوسع في تفاصيل غير ضرورية.
+
+16. لا تبدأ قسمًا أو جدولًا ثم تتركه
+    غير مكتمل.
+
+17. اذكر الاستشهاد بجانب المعلومة
+    التي يدعمها المصدر.
 """
 
 
@@ -410,8 +435,7 @@ def validate_citations(answer, retrieved):
         for item in retrieved
     }
 
-    # دعم المسافات العادية وغير المرئية
-    # والأرقام العربية والإنجليزية
+    # دعم الأرقام العربية والإنجليزية
     pattern = r"\[الصفحة\s*([0-9٠-٩۰-۹]+)\s*\]"
 
     citations = re.findall(
@@ -422,19 +446,16 @@ def validate_citations(answer, retrieved):
     if not citations:
         return False
 
+    translation_table = str.maketrans(
+        "٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹",
+        "01234567890123456789"
+    )
+
     try:
-        cited_pages = []
-
-        for citation in citations:
-
-            normalized = citation.translate(
-                str.maketrans(
-                    "٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹",
-                    "01234567890123456789"
-                )
-            )
-
-            cited_pages.append(int(normalized))
+        cited_pages = [
+            int(value.translate(translation_table))
+            for value in citations
+        ]
 
     except ValueError:
         return False
@@ -446,7 +467,22 @@ def validate_citations(answer, retrieved):
 
 
 # ============================================================
-# 12. الإجابة عن أسئلة المستخدم
+# 12. فحص سبب انتهاء التوليد
+# ============================================================
+
+def get_finish_reason(response):
+
+    metadata = getattr(
+        response,
+        "response_metadata",
+        {}
+    ) or {}
+
+    return metadata.get("finish_reason")
+
+
+# ============================================================
+# 13. الإجابة عن أسئلة المستخدم
 # ============================================================
 
 def answer_question(question, state):
@@ -504,14 +540,14 @@ def answer_question(question, state):
         )
     )
 
-    # إعداد Groq
+    # إعداد Groq مع حد توليد أكبر
     llm = ChatGroq(
         model=GROQ_MODEL,
         temperature=0,
-        max_tokens=700
+        max_tokens=MAX_OUTPUT_TOKENS
     )
 
-    # احتساب طلب النموذج
+    # احتساب استدعاء النموذج
     state["calls"] += 1
 
     try:
@@ -530,11 +566,34 @@ def answer_question(question, state):
             )
         ])
 
-        answer = str(response.content).strip()
+        # استخراج الإجابة
+        content = response.content
+
+        if isinstance(content, str):
+            answer = content.strip()
+        else:
+            answer = str(content).strip()
 
     except Exception:
         return (
             "تعذر توليد الإجابة حاليًا.",
+            sources
+        )
+
+    # الكشف عن انتهاء التوليد بسبب حد الرموز
+    finish_reason = get_finish_reason(response)
+
+    if finish_reason == "length":
+        return (
+            "توقفت الإجابة بسبب بلوغ الحد الأقصى "
+            "لرموز التوليد. يرجى تقصير السؤال "
+            "أو زيادة MAX_OUTPUT_TOKENS.",
+            sources
+        )
+
+    if not answer:
+        return (
+            "لم يُنتج النموذج إجابة نصية.",
             sources
         )
 
@@ -553,7 +612,7 @@ def answer_question(question, state):
 
 
 # ============================================================
-# 13. واجهة المستخدم Gradio
+# 14. واجهة المستخدم Gradio
 # ============================================================
 
 with gr.Blocks(
@@ -637,7 +696,7 @@ with gr.Blocks(
 
 
 # ============================================================
-# 14. تشغيل التطبيق
+# 15. تشغيل التطبيق
 # ============================================================
 
 if __name__ == "__main__":
