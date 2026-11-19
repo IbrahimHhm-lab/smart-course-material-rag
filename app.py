@@ -727,9 +727,45 @@ APP_CSS = """
     text-align: right;
 }
 
+
+/* تنسيق الإجابات من اليسار إلى اليمين */
+#answer-panel {
+    direction: ltr;
+    text-align: left;
+}
+
 #answer-panel .prose {
-    direction: rtl;
-    text-align: right;
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+/* الفقرات والعناوين والقوائم */
+#answer-panel p,
+#answer-panel h1,
+#answer-panel h2,
+#answer-panel h3,
+#answer-panel li {
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+/* الأكواد البرمجية */
+#answer-panel pre,
+#answer-panel code {
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+#answer-panel pre {
+    overflow-x: auto;
+}
+
+/* الجداول */
+#answer-panel table {
+    direction: ltr !important;
+    text-align: left !important;
+}
+
 }
 
 #answer-panel pre,
