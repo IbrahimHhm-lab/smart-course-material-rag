@@ -694,51 +694,110 @@ APP_THEME = gr.themes.Soft(
 )
 
 APP_CSS = """
+/* Main application layout */
 .gradio-container {
     max-width: 1150px !important;
-    margin: auto !important;
+    margin: 0 auto !important;
     font-family: Tahoma, Arial, sans-serif !important;
 }
 
+/* Centered, polished Cor-AI logo: half the previous 950px maximum */
 #app-logo {
-    max-width: 950px;
-    margin: 0 auto 20px auto;
+    width: 50% !important;
+    max-width: 475px !important;
+    margin: 12px auto 16px auto !important;
+    overflow: hidden;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(16, 51, 75, 0.12);
 }
 #app-logo img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-    border-radius: 16px;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    border-radius: 18px;
 }
+
+/* Group title, centered beneath logo */
+#group-title,
+#group-title .prose,
+#group-title p,
+#group-title h2 {
+    direction: rtl !important;
+    text-align: center !important;
+}
+#group-title {
+    margin: 0 auto 24px auto !important;
+}
+#group-title h2 {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #105c43 !important;
+}
+
+/* Academic panels */
 #upload-panel,
 #question-panel,
 #answer-panel {
     border: 1px solid #d5e5dc;
     border-radius: 14px;
     padding: 16px;
+    direction: rtl !important;
+    text-align: right !important;
 }
-#question-panel textarea {
-    direction: rtl;
-    text-align: right;
-}
-#answer-panel,
+
+/* Section titles, labels, and Arabic prose */
+#upload-panel .prose,
+#question-panel .prose,
 #answer-panel .prose,
-#answer-panel p,
-#answer-panel h1,
-#answer-panel h2,
-#answer-panel h3,
-#answer-panel li,
-#answer-panel table {
-    direction: ltr !important;
-    text-align: left !important;
+#upload-panel h1, #upload-panel h2, #upload-panel h3,
+#question-panel h1, #question-panel h2, #question-panel h3,
+#answer-panel h1, #answer-panel h2, #answer-panel h3,
+#answer-panel p, #answer-panel li,
+#answer-panel blockquote,
+#upload-panel label, #question-panel label, #answer-panel label {
+    direction: rtl !important;
+    text-align: right !important;
 }
+
+/* Input, status and sources fields */
+#upload-panel textarea, #upload-panel input,
+#question-panel textarea, #question-panel input,
+#answer-panel textarea, #answer-panel input {
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* Arabic answer tables */
+#answer-panel table,
+#answer-panel th,
+#answer-panel td {
+    direction: rtl !important;
+    text-align: right !important;
+}
+
+/* Keep Python and other fenced code left-to-right */
 #answer-panel pre,
-#answer-panel code {
+#answer-panel pre code,
+#answer-panel .prose pre,
+#answer-panel .prose pre code {
     direction: ltr !important;
     text-align: left !important;
+    unicode-bidi: isolate;
 }
 #answer-panel pre {
     overflow-x: auto;
+}
+#answer-panel :not(pre) > code {
+    direction: ltr;
+    unicode-bidi: isolate;
+}
+
+@media (max-width: 600px) {
+    #app-logo {
+        width: 85% !important;
+        margin: 12px auto 18px auto !important;
+    }
 }
 """
 
@@ -756,13 +815,8 @@ with gr.Blocks(title="Cor-AI | Smart Course Material RAG") as demo:
     )
 
     gr.Markdown(
-        """
-        **التقنيات المستخدمة:** LangChain · Groq ·
-        FAISS · Multilingual Embeddings
-
-        ارفع ملف PDF، ثم اطرح أسئلتك للحصول على
-        إجابات مدعومة بأرقام الصفحات.
-        """
+        "## مجموعة G12",
+        elem_id="group-title"
     )
 
     session = gr.State(value=None)
