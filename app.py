@@ -743,85 +743,109 @@ APP_CSS = """
 }
 """
 
+
+# ============================================================
+# واجهة Gradio الاحترافية
+# ============================================================
+
 with gr.Blocks(
-    title="Smart Course Material RAG"
+    title="Smart Course Material RAG",
+    theme=APP_THEME,
+    css=APP_CSS
 ) as demo:
 
     gr.Markdown(
-        "# Smart Course Material RAG"
+        """
+        # 🎓 Smart Course Material RAG
+
+        المساعد الأكاديمي الذكي لتحليل المواد التعليمية
+        والإجابة عن الأسئلة باستخدام RAG
+        """,
+        elem_id="app-header"
     )
 
     gr.Markdown(
         """
-        نظام ذكي للإجابة عن الأسئلة من ملفات PDF
-        باستخدام:
+        **التقنيات المستخدمة:** LangChain · Groq ·
+        FAISS · Multilingual Embeddings
 
-        - LangChain + Groq
-        - Multilingual Embeddings
-        - FAISS Vector Search
-        - Retrieval-Augmented Generation (RAG)
-
-        ارفع المادة التعليمية ثم اطرح أسئلتك.
+        ارفع ملف PDF، ثم اطرح أسئلتك للحصول على
+        إجابات مدعومة بأرقام الصفحات.
         """
     )
 
     session = gr.State(value=None)
 
-    pdf_input = gr.File(
-        label="رفع المادة التعليمية PDF",
-        file_types=[".pdf"],
-        type="filepath"
+    with gr.Row():
+
+        with gr.Column(scale=1, elem_id="upload-panel"):
+
+            gr.Markdown("### 📄 المادة التعليمية")
+
+            pdf_input = gr.File(
+                label="رفع ملف PDF",
+                file_types=[".pdf"],
+                type="filepath"
+            )
+
+            process_button = gr.Button(
+                "معالجة الملف",
+                variant="primary"
+            )
+
+            status = gr.Textbox(
+                label="حالة معالجة الملف",
+                interactive=False
+            )
+
+        with gr.Column(scale=2, elem_id="question-panel"):
+
+            gr.Markdown("### 💬 اسأل عن المادة")
+
+            question = gr.Textbox(
+                label="السؤال",
+                placeholder=(
+                    "مثال: ما المكونات الأساسية في LangChain؟"
+                ),
+                lines=3
+            )
+
+            ask_button = gr.Button(
+                "إرسال السؤال",
+                variant="primary"
+            )
+
+    with gr.Column(elem_id="answer-panel"):
+
+        gr.Markdown("### ✨ الإجابة الذكية")
+
+        answer = gr.Markdown(
+            value="ستظهر الإجابة هنا بعد طرح السؤال."
+        )
+
+        sources = gr.Textbox(
+            label="📚 الصفحات المسترجعة",
+            interactive=False
+        )
+
+    gr.Markdown(
+        """
+        ---
+        Smart Course Material RAG | Academic AI Assistant
+        """
     )
 
-    status = gr.Textbox(
-        label="حالة معالجة الملف",
-        interactive=False
-    )
-
-    process_button = gr.Button(
-        "معالجة الملف",
-        variant="primary"
-    )
-
-    question = gr.Textbox(
-        label="اكتب سؤالك",
-        placeholder=(
-            "مثال: ما المكونات الستة الأساسية "
-            "في LangChain؟"
-        ),
-        lines=2
-    )
-
-    ask_button = gr.Button(
-        "إرسال السؤال",
-        variant="primary"
-    )
-
-    answer = gr.Textbox(
-        label="الإجابة",
-        lines=10,
-        interactive=False
-    )
-
-    sources = gr.Textbox(
-        label="المصادر المسترجعة",
-        interactive=False
-    )
-
-    # معالجة الملف
     process_button.click(
         fn=process_pdf,
         inputs=[pdf_input],
         outputs=[session, status]
     )
 
-    # الإجابة عن السؤال
     ask_button.click(
         fn=answer_question,
         inputs=[question, session],
         outputs=[answer, sources]
     )
-
 
 # ============================================================
 # 15. تشغيل التطبيق
