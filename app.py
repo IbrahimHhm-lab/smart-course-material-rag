@@ -71,7 +71,31 @@ def clean_text(text):
 
     return text.strip()
 
+def add_code_warning(answer):
+    code_blocks = re.findall(
+        r"```[^\n]*\n(.*?)```",
+        answer,
+        flags=re.DOTALL
+    )
 
+    arabic_pattern = re.compile(r"[\u0600-\u06FF]")
+
+    has_arabic_code = any(
+        arabic_pattern.search(code)
+        for code in code_blocks
+    )
+
+    warning = (
+        "\n\n⚠️ **تنبيه:** يحتوي أحد الأمثلة البرمجية "
+        "على نص عربي قد يتأثر باتجاه الكتابة عند "
+        "استخراجه من PDF. يُرجى مطابقته بالمصدر "
+        "الأصلي قبل التنفيذ."
+    )
+
+    if has_arabic_code and warning not in answer:
+        return answer + warning
+
+    return answer
 # ============================================================
 # 4. استخراج النصوص من ملف PDF
 # ============================================================
@@ -637,19 +661,20 @@ def answer_question(question, state):
             sources
         )
 
+  
     # السماح بالامتناع الصحيح دون استشهاد
     if ABSTAIN in answer:
         return ABSTAIN, sources
 
-    # التحقق من أرقام الصفحات
-    if not validate_citations(
-        answer,
-        retrieved
-    ):
+    # التحقق من صحة أرقام الصفحات
+    if not validate_citations(answer, retrieved):
         return ABSTAIN, sources
 
-    return answer, sources
+    # إضافة تحذير عند وجود نص عربي داخل الأمثلة البرمجية
+    answer = add_code_warning(answer)
 
+    # إرجاع الإجابة النهائية والمصادر
+    return answer, sources
 
 # ============================================================
 # 14. واجهة المستخدم Gradio
