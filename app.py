@@ -1,7 +1,7 @@
 
 import os
 import re
-import fitz
+import pymupdf as fitz
 import faiss
 import gradio as gr
 import numpy as np
