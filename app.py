@@ -5,7 +5,7 @@ import pymupdf as fitz
 import faiss
 import gradio as gr
 import numpy as np
-
+from pathlib import Path
 from functools import lru_cache
 from sentence_transformers import SentenceTransformer
 from langchain_groq import ChatGroq
@@ -777,6 +777,18 @@ APP_CSS = """
 #answer-panel pre {
     overflow-x: auto;
 }
+
+#app-logo {
+    max-width: 950px;
+    margin: 0 auto 20px auto;
+}
+
+#app-logo img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 16px;
+}
 """
 
 
@@ -784,21 +796,16 @@ APP_CSS = """
 # واجهة Gradio الاحترافية
 # ============================================================
 
-with gr.Blocks(
-    title="Smart Course Material RAG",
-    theme=APP_THEME,
-    css=APP_CSS
-) as demo:
-
-    gr.Markdown(
-        """
-        # 🎓 Smart Course Material RAG
-
-        المساعد الأكاديمي الذكي لتحليل المواد التعليمية
-        والإجابة عن الأسئلة باستخدام RAG
-        """,
-        elem_id="app-header"
-    )
+with gr.Image(
+    value=str(Path(__file__).resolve().parent / "Cor Ai.jpeg"),
+    label=None,
+    show_label=False,
+    interactive=False,
+    show_download_button=False,
+    show_fullscreen_button=False,
+    container=False,
+    elem_id="app-logo"
+)
 
     gr.Markdown(
         """
