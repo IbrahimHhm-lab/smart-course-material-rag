@@ -78,17 +78,17 @@ def clean_text(text):
 
 def extract_pdf_pages(file_path):
     pages = []
+    scanned_pages = []
 
     with fitz.open(file_path) as pdf:
 
         if len(pdf) > MAX_PAGES:
             raise ValueError(
-                "الحد الأقصى المسموح هو 100 صفحة."
+                f"الحد الأقصى المسموح هو {MAX_PAGES} صفحة."
             )
 
         for page_number, page in enumerate(pdf, 1):
 
-            # محاولة ترتيب النص حسب موضعه على الصفحة
             text = page.get_text(
                 "text",
                 sort=True
@@ -101,9 +101,23 @@ def extract_pdf_pages(file_path):
                     "page": page_number,
                     "text": text
                 })
+            else:
+                scanned_pages.append(page_number)
+
+    if scanned_pages:
+        print(
+            "تنبيه: صفحات لا تحتوي على نص قابل "
+            "للاستخراج وقد تحتاج إلى OCR:",
+            scanned_pages
+        )
+
+    if not pages:
+        raise ValueError(
+            "لم يتم العثور على نص قابل للاستخراج. "
+            "قد يكون الملف مصورًا ويحتاج إلى OCR."
+        )
 
     return pages
-
 
 # ============================================================
 # 5. تقسيم النصوص إلى Chunks
