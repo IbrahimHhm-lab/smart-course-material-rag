@@ -750,15 +750,17 @@ APP_CSS = """
 }
 
 /* عنوان مجموعة G12 */
+
+/* تثبيت اللون الأبيض لعنوان المجموعة */
 #group-title,
+#group-title *,
 #group-title .prose,
-#group-title p,
-#group-title h1,
-#group-title h2 {
+#group-title p {
     color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     text-align: center !important;
-    direction: rtl !important;
 }
+
 
 #group-title {
     margin: 8px auto 28px auto !important;
