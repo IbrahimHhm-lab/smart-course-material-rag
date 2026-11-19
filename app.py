@@ -796,16 +796,24 @@ APP_CSS = """
 # واجهة Gradio الاحترافية
 # ============================================================
 
-with gr.Image(
-    value=str(Path(__file__).resolve().parent / "Cor Ai.jpeg"),
-    label=None,
-    show_label=False,
-    interactive=False,
-    show_download_button=False,
-    show_fullscreen_button=False,
-    container=False,
-    elem_id="app-logo"
-)
+
+with gr.Blocks(
+    title="Cor-AI | Smart Course Material RAG",
+    theme=APP_THEME,
+    css=APP_CSS
+) as demo:
+
+    gr.Image(
+        value=str(Path(__file__).resolve().parent / "Cor Ai.jpeg"),
+        label=None,
+        show_label=False,
+        interactive=False,
+        show_download_button=False,
+        show_fullscreen_button=False,
+        container=False,
+        elem_id="app-logo"
+    )
+
 
     gr.Markdown(
         """
