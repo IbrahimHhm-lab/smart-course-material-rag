@@ -680,6 +680,69 @@ def answer_question(question, state):
 # 14. واجهة المستخدم Gradio
 # ============================================================
 
+# ============================================================
+# تصميم الواجهة الأكاديمية
+# ============================================================
+
+APP_THEME = gr.themes.Soft(
+    primary_hue="emerald",
+    secondary_hue="slate",
+    neutral_hue="slate",
+    radius_size="lg",
+    spacing_size="md",
+    text_size="md"
+)
+
+APP_CSS = """
+.gradio-container {
+    max-width: 1150px !important;
+    margin: auto !important;
+    font-family: Tahoma, Arial, sans-serif !important;
+}
+
+#app-header {
+    background: linear-gradient(120deg, #105c43, #12334b);
+    color: white;
+    border-radius: 18px;
+    padding: 28px;
+    text-align: center;
+}
+
+#app-header h1,
+#app-header p {
+    color: white !important;
+}
+
+#upload-panel,
+#question-panel,
+#answer-panel {
+    border: 1px solid #d5e5dc;
+    border-radius: 14px;
+    padding: 16px;
+}
+
+#question-panel textarea,
+#answer-panel {
+    direction: rtl;
+    text-align: right;
+}
+
+#answer-panel .prose {
+    direction: rtl;
+    text-align: right;
+}
+
+#answer-panel pre,
+#answer-panel code {
+    direction: ltr;
+    text-align: left;
+}
+
+#answer-panel pre {
+    overflow-x: auto;
+}
+"""
+
 with gr.Blocks(
     title="Smart Course Material RAG"
 ) as demo:
