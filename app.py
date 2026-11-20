@@ -701,77 +701,42 @@ APP_CSS = """
     font-family: Tahoma, Arial, sans-serif !important;
 }
 
-/* Centered, polished Cor-AI logo: half the previous 950px maximum */
+/* Wide horizontal Cor-AI logo, aligned with the content panels */
 #app-logo {
-    width: 50% !important;
-    max-width: 475px !important;
-    margin: 12px auto 16px auto !important;
-    overflow: hidden;
-    border-radius: 18px;
-    box-shadow: 0 8px 24px rgba(16, 51, 75, 0.12);
-
-/* شعار Cor-AI بتصميم مستطيل أفقي */
-#app-logo {
-    width: 85% !important;
+    width: 100% !important;
     max-width: 1100px !important;
-    margin: 12px auto 22px auto !important;
+    height: 285px !important;
+    margin: 10px auto 20px auto !important;
     border-radius: 20px !important;
     overflow: hidden !important;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
 }
-
 #app-logo img {
     display: block !important;
     width: 100% !important;
-    height: 280px !important;
+    height: 100% !important;
     object-fit: contain !important;
     border-radius: 20px !important;
 }
 
-/* ضبط الشعار على الجوال */
-@media (max-width: 600px) {
-    #app-logo {
-        width: 100% !important;
-    }
-
-    #app-logo img {
-        height: 170px !important;
-    }
-}
-
-
-/* Group title, centered beneath logo */
-#group-title,
-#group-title .prose,
-#group-title p,
-#group-title h2 {
-    direction: rtl !important;
-    text-align: center !important;
-}
-
-/* عنوان مجموعة G12 */
-
-/* تثبيت اللون الأبيض لعنوان المجموعة */
+/* White G12 group title, centered below the logo */
 #group-title,
 #group-title *,
 #group-title .prose,
-#group-title p {
+#group-title p,
+#group-title h2 {
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
+    direction: rtl !important;
     text-align: center !important;
 }
-
-
 #group-title {
-    margin: 8px auto 28px auto !important;
+    margin: 8px auto 26px auto !important;
 }
-
-#group-title p,
 #group-title h2 {
     font-size: 26px !important;
     font-weight: 700 !important;
 }
-
 
 /* Academic panels */
 #upload-panel,
@@ -833,8 +798,9 @@ APP_CSS = """
 
 @media (max-width: 600px) {
     #app-logo {
-        width: 85% !important;
-        margin: 12px auto 18px auto !important;
+        width: 100% !important;
+        height: 175px !important;
+        margin: 10px auto 18px auto !important;
     }
 }
 """
