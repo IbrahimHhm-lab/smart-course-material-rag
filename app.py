@@ -701,41 +701,38 @@ APP_CSS = """
     font-family: Tahoma, Arial, sans-serif !important;
 }
 
-/* Wide horizontal Cor-AI logo, aligned with the content panels */
+/* Centered, polished Cor-AI logo: half the previous 950px maximum */
 #app-logo {
-    width: 100% !important;
-    max-width: 1100px !important;
-    height: 285px !important;
-    margin: 10px auto 20px auto !important;
-    border-radius: 20px !important;
-    overflow: hidden !important;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+    width: 50% !important;
+    max-width: 475px !important;
+    margin: 12px auto 16px auto !important;
+    overflow: hidden;
+    border-radius: 18px;
+    box-shadow: 0 8px 24px rgba(16, 51, 75, 0.12);
 }
 #app-logo img {
     display: block !important;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
     object-fit: contain !important;
-    border-radius: 20px !important;
+    border-radius: 18px;
 }
 
-/* White G12 group title, centered below the logo */
+/* Group title, centered beneath logo */
 #group-title,
-#group-title *,
 #group-title .prose,
 #group-title p,
 #group-title h2 {
-    color: #FFFFFF !important;
-    -webkit-text-fill-color: #FFFFFF !important;
     direction: rtl !important;
     text-align: center !important;
 }
 #group-title {
-    margin: 8px auto 26px auto !important;
+    margin: 0 auto 24px auto !important;
 }
 #group-title h2 {
-    font-size: 26px !important;
+    font-size: 24px !important;
     font-weight: 700 !important;
+    color: #105c43 !important;
 }
 
 /* Academic panels */
@@ -798,9 +795,8 @@ APP_CSS = """
 
 @media (max-width: 600px) {
     #app-logo {
-        width: 100% !important;
-        height: 175px !important;
-        margin: 10px auto 18px auto !important;
+        width: 85% !important;
+        margin: 12px auto 18px auto !important;
     }
 }
 """
