@@ -701,38 +701,46 @@ APP_CSS = """
     font-family: Tahoma, Arial, sans-serif !important;
 }
 
-/* Centered, polished Cor-AI logo: half the previous 950px maximum */
+/* شعار كامل الحجم بعرض متناسق مع أقسام الصفحة */
 #app-logo {
-    width: 50% !important;
-    max-width: 475px !important;
-    margin: 12px auto 16px auto !important;
-    overflow: hidden;
-    border-radius: 18px;
-    box-shadow: 0 8px 24px rgba(16, 51, 75, 0.12);
+    width: 100% !important;
+    max-width: 1150px !important;
+    height: auto !important;
+    margin: 12px auto 20px !important;
+    overflow: hidden !important;
+    border-radius: 18px !important;
 }
 #app-logo img {
-    display: block !important;
     width: 100% !important;
     height: auto !important;
+    max-height: none !important;
     object-fit: contain !important;
-    border-radius: 18px;
+    display: block !important;
+}
+#app-logo .image-container,
+#app-logo .wrap {
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
 }
 
-/* Group title, centered beneath logo */
+/* White G12 group title, centered below the logo */
 #group-title,
+#group-title *,
 #group-title .prose,
 #group-title p,
 #group-title h2 {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
     direction: rtl !important;
     text-align: center !important;
 }
 #group-title {
-    margin: 0 auto 24px auto !important;
+    margin: 8px auto 26px auto !important;
 }
 #group-title h2 {
-    font-size: 24px !important;
+    font-size: 26px !important;
     font-weight: 700 !important;
-    color: #105c43 !important;
 }
 
 /* Academic panels */
@@ -793,10 +801,80 @@ APP_CSS = """
     unicode-bidi: isolate;
 }
 
-@media (max-width: 600px) {
+/* في البداية تظهر أقسام رفع الملف والسؤال عموديًا */
+#main-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+}
+#main-layout > * {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+}
+
+/* بعد فهرسة PDF بنجاح تتحول الأقسام إلى عمودين */
+body:has(#layout-ready) #main-layout {
+    flex-direction: row !important;
+    align-items: flex-start !important;
+}
+body:has(#layout-ready) #main-layout > #upload-panel {
+    width: 34% !important;
+    flex: 1 1 34% !important;
+}
+body:has(#layout-ready) #main-layout > #question-panel {
+    width: 66% !important;
+    flex: 2 1 66% !important;
+}
+#layout-state {
+    display: none !important;
+}
+
+/* إبقاء العناوين والإجابات العربية بمحاذاة اليمين */
+#answer-panel blockquote {
+    border-left: 0 !important;
+    border-right: 4px solid #10b981 !important;
+    padding-right: 14px !important;
+    padding-left: 0 !important;
+}
+#answer-panel .prose,
+#answer-panel .prose *:not(pre):not(code) {
+    text-align: right;
+}
+#answer-panel pre,
+#answer-panel pre * {
+    direction: ltr !important;
+    text-align: left !important;
+}
+
+/* عند الطباعة: إظهار الإجابة ومصادرها فقط */
+@media print {
+    body, .gradio-container { background: white !important; color: black !important; }
+    #app-logo, #group-title, #main-layout, #layout-state,
+    #print-answer, footer, .footer { display: none !important; }
+    #answer-panel {
+        display: block !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        color: black !important;
+    }
+    #answer-panel * { color: black !important; }
+    #answer-panel pre { white-space: pre-wrap !important; }
+}
+@media (max-width: 700px) {
+    body:has(#layout-ready) #main-layout {
+        flex-direction: column !important;
+    }
+    body:has(#layout-ready) #main-layout > #upload-panel,
+    body:has(#layout-ready) #main-layout > #question-panel {
+        width: 100% !important;
+        flex: 0 0 auto !important;
+    }
     #app-logo {
-        width: 85% !important;
-        margin: 12px auto 18px auto !important;
+        width: 100% !important;
+        height: auto !important;
+        margin: 10px auto 18px auto !important;
     }
 }
 """
@@ -814,14 +892,12 @@ with gr.Blocks(title="Cor-AI | Smart Course Material RAG") as demo:
         elem_id="app-logo"
     )
 
-    gr.Markdown(
-        "## مجموعة G12",
-        elem_id="group-title"
-    )
+    gr.Markdown("## G12", elem_id="group-title")
 
     session = gr.State(value=None)
 
-    with gr.Row():
+    # يبدأ العرض عموديًا، ثم يتحول إلى عمودين بعد نجاح معالجة PDF.
+    with gr.Row(elem_id="main-layout"):
         with gr.Column(scale=1, elem_id="upload-panel"):
             gr.Markdown("### 📄 المادة التعليمية")
             pdf_input = gr.File(
@@ -841,17 +917,33 @@ with gr.Blocks(title="Cor-AI | Smart Course Material RAG") as demo:
             )
             ask_button = gr.Button("إرسال السؤال", variant="primary")
 
+    # علامة داخل الواجهة لتغيير التخطيط بعد اكتمال الفهرسة
+    layout_state = gr.HTML(value="", visible=True, elem_id="layout-state")
+
     with gr.Column(elem_id="answer-panel"):
         gr.Markdown("### ✨ الإجابة الذكية")
         answer = gr.Markdown(value="ستظهر الإجابة هنا بعد طرح السؤال.")
         sources = gr.Textbox(label="📚 الصفحات المسترجعة", interactive=False)
+        print_button = gr.Button("🖨️ طباعة الإجابة", variant="secondary", elem_id="print-answer")
 
     gr.Markdown("---\nCor-AI | Smart Course Material RAG")
 
+    def process_pdf_with_layout(file_path):
+        state, message = process_pdf(file_path)
+        marker = '<span id="layout-ready" aria-hidden="true"></span>' if state else ""
+        return state, message, marker
+
     process_button.click(
-        fn=process_pdf,
+        fn=process_pdf_with_layout,
         inputs=[pdf_input],
-        outputs=[session, status]
+        outputs=[session, status, layout_state]
+    )
+
+    print_button.click(
+        fn=None,
+        inputs=[],
+        outputs=[],
+        js="() => { window.print(); }"
     )
     ask_button.click(
         fn=answer_question,
